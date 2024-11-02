@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styled Cartesian Coordinate Grid</title>
+  <style>
+    /* Center the grid container */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #1e1e2f; /* Dark background for contrast */
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f0f6ff; /* Light color for text */
+    }
+
+    .grid-container {
+      position: relative;
+      width: 1000px; /* Increased width to 1000px */
+      height: 1000px; /* Increased height to 1000px */
+      background-color: #25293c; /* Dark grey background */
+      border-radius: 10px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(39, 1fr); /* 39 columns for -19 to 19 */
+      grid-template-rows: repeat(39, 1fr); /* 39 rows for -19 to 19 */
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5); /* Soft shadow for depth */
+    }
+
+    /* Blue grid lines positioned behind everything */
+    .grid-container::before,
+    .grid-container::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(to right, rgba(45, 85, 255, 0.1) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(45, 85, 255, 0.1) 1px, transparent 1px);
+      background-size: 25px 25px;
+      z-index: 0; /* Positioned in the background */
+    }
+
+    /* X and Y axes */
+    .axis {
+      position: absolute;
+      background-color: #00c0ff; /* Aqua blue for main axis lines */
+      z-index: 1; /* Position axes on top of grid lines */
+    }
+    .x-axis {
+      height: 100%;
+      width: 2px;
+      left: 50%;
+      top: 0;
+    }
+    .y-axis {
+      width: 100%;
+      height: 2px;
+      top: 50%;
+      left: 0;
+    }
+
+    /* Styling for tick marks */
+    .tick {
+      position: absolute;
+      background-color: #00c0ff;
+      z-index: 1;
+    }
+    .x-tick {
+      width: 10px;
+      height: 2px;
+      left: 50%;
+    }
+    .y-tick {
+      width: 2px;
+      height: 10px;
+      top: 50%;
+    }
+
+    /* Label styling */
+    .label {
+      position: absolute;
+      font-size: 12px;
+      color: #f0f6ff; /* Light color for labels */
+      transform: translate(-50%, -50%);
+      font-weight: 600;
+      z-index: 2; /* Ensure labels are on top */
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7); /* Text shadow for readability */
+    }
+
+    /* X and Y axis labels */
+    .x-label {
+      top: 50%;
+      left: -20px;
+      transform: translate(-100%, -50%) rotate(-90deg);
+      font-weight: bold;
+      font-size: 16px;
+      color: #00c0ff;
+    }
+    .y-label {
+      left: 50%;
+      bottom: -20px;
+      transform: translate(-50%, 0);
+      font-weight: bold;
+      font-size: 16px;
+      color: #00c0ff;
+    }
+
+    /* New styles for the input section */
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      margin-left: 20px; /* Space between grid and input section */
+    }
+
+    .input-container input {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333; /* Dark text color */
+      min-width: 150px; /* Set a minimum width */
+      transition: width 0.2s; /* Smooth transition for width change */
+    }
+
+    .input-container button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #00c0ff; /* Button color */
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-bottom: 10px; /* Space between buttons */
+    }
+
+    .input-container button:hover {
+      background-color: #0091b2; /* Darker shade on hover */
+    }
+
+    /* Style for the dot */
+    .dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red; /* Dot color */
+      border-radius: 50%; /* Make it circular */
+      z-index: 3; /* Ensure dot is on top of everything */
+    }
+
+    /* Style for the coordinate label */
+    .coordinate-label {
+    position: absolute;
+    font-size: 10px; /* Decreased font size for labels */
+    color: #f0f6ff; /* Light color for text */
+    z-index: 4; /* Ensure label is above the dot */
+    transform: translate(-50%, -100%); /* Position above the dot */
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-container">
+  <!-- X and Y Axes -->
+  <div class="axis x-axis"></div>
+  <div class="axis y-axis"></div>
+
+  <!-- Tick marks and labels for x-axis -->
+  <script>
+    const container = document.querySelector('.grid-container');
+    for (let i = -19; i <= 19; i++) { // Change range to -19 to 19 for 39 ticks
+      if (i !== 0) { // Skip origin
+
+        // Create x-axis ticks and labels
+        const xTick = document.createElement('div');
+        xTick.classList.add('tick', 'x-tick');
+        xTick.style.top = `${50 + i * (100 / 39)}%`; // Adjust position for 39 rows
+        container.appendChild(xTick);
+
+        const xLabel = document.createElement('div');
+        xLabel.classList.add('label');
+        xLabel.style.top = `${50 + i * (100 / 39)}%`; // Adjust position for 39 rows
+        xLabel.style.left = '50%';
+        xLabel.innerText = i;
+        container.appendChild(xLabel);
+
+        // Create y-axis ticks and labels
+        const yTick = document.createElement('div');
+        yTick.classList.add('tick', 'y-tick');
+        yTick.style.left = `${50 - i * (100 / 39)}%`; // Adjust position for 39 columns
+        container.appendChild(yTick);
+
+        const yLabel = document.createElement('div');
+        yLabel.classList.add('label');
+        yLabel.style.top = '50%';
+        yLabel.style.left = `${50 - i * (100 / 39)}%`; // Adjust position for 39 columns
+        yLabel.innerText = -i;
+        container.appendChild(yLabel);
+      }
+    }
+  </script>
+
+  <!-- X and Y axis labels -->
+  <div class="label x-label">x</div>
+  <div class="label y-label">y</div>
+</div>
+
+<!-- New input section -->
+<div class="input-container">
+    <h2>Enter Values:</h2>
+    <input type="text" id="coordinateInput" placeholder="" aria-label="Coordinate input" />
+    <div class="button-group">
+      <button type="button" id="submitButton" aria-label="Submit coordinates">Submit</button>
+      <button type="button" id="toggleLabelButton" aria-label="Toggle coordinate labels">Toggle Labels</button>
+      <button type="button" id="clearButton" aria-label="Clear coordinates">Clear</button>
+    </div>
+  </div>
+
+<script>
+  const submitButton = document.getElementById('submitButton');
+  const inputField = document.getElementById('coordinateInput');
+  const toggleLabelButton = document.getElementById('toggleLabelButton');
+  const clearDotsButton = document.getElementById('clearDotsButton');
+  let labelsVisible = true; // Track label visibility
+
+  const adjustInputWidth = () => {
+    const tempSpan = document.createElement('span');
+    document.body.appendChild(tempSpan);
+    tempSpan.style.font = window.getComputedStyle(inputField).font;
+    tempSpan.innerText = inputField.value || inputField.placeholder; // Use placeholder if empty
+    inputField.style.width = `${tempSpan.offsetWidth + 20}px`; // Set width with padding
+    document.body.removeChild(tempSpan);
+  };
+
+  adjustInputWidth();
+  
+  inputField.addEventListener('input', adjustInputWidth);
+
+  // Updated regex to accept both formats
+  const regex = /^\s*(\(?\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*\)?(\s*,\s*)?)+$/;
+
+  submitButton.addEventListener('click', () => {
+    const inputValue = inputField.value;
+
+    if (regex.test(inputValue)) {
+      const coordinates = inputValue.split('),(').map(coord => {
+        // Remove parentheses and split by comma
+        return coord.replace(/[()]/g, '').split(',').map(Number);
+      });
+
+      coordinates.forEach(([x, y]) => {
+        const cellSize = 25;
+        const offset = cellSize / 6;
+
+        const xPos = 500 + (x * cellSize) - offset;
+        const yPos = 500 - (y * cellSize) - offset;
+
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.style.left = `${xPos}px`;
+        dot.style.top = `${yPos}px`;
+        container.appendChild(dot);
+
+        const label = document.createElement('div');
+        label.classList.add('coordinate-label');
+        label.style.left = `${xPos}px`;
+        label.style.top = `${yPos}px`;
+        label.innerText = `(${x}, ${y})`;
+        container.appendChild(label);
+      });
+
+      inputField.value = '';
+      adjustInputWidth();
+    } else {
+      alert('Please enter valid coordinates in the format (x,y),(x,y)... or x,y.');
+    }
+  });
+
+  toggleLabelButton.addEventListener('click', () => {
+    labelsVisible = !labelsVisible;
+    const labels = document.querySelectorAll('.coordinate-label');
+    labels.forEach(label => {
+      label.style.display = labelsVisible ? 'block' : 'none';
+    });
+  });
+
+  clearDotsButton.addEventListener('click', () => {
+    const dots = document.querySelectorAll('.dot, .coordinate-label');
+    dots.forEach(dot => dot.remove());
+  });
+</script>
+
+</body>
+</html>
